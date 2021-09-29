@@ -1,0 +1,17 @@
+.canvas{
+    border: 2px solid black;
+
+    
+}
+
+.canvas-box{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+
+h1{
+    display: flex;
+    justify-content: center;
+}
