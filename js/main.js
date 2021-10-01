@@ -7,12 +7,9 @@ let fichasJugador2 = fichasInicial;
 let jugador1 = null;
 let jugador2 = null;
 let arrastrar = false;
-    var delta = new Object();
-    var L = 5;
-    var paso = 2;
-    var R = 100;
-    var X = canvas.width / 2;
-    var Y = canvas.height / 2;
+let delta = new Object();
+let X = canvas.width / 2;
+let Y = canvas.height / 2;
 
 let amarilla = {
     x: 190,
@@ -100,7 +97,7 @@ canvas.addEventListener("mousedown", function(evt) {
     }
   }, false);
 
-  
+
   canvas.addEventListener("mouseup", function(evt) {
     if(arrastrar){
         var mousePos = onMousePos(evt);
