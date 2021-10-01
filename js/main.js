@@ -1,17 +1,30 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
-let amarilla = document.getElementById("fichaAmarilla"); 
-let roja = document.getElementById("fichaRoja");
 let matrizTablero = [];
 let fichasInicial = 40;
 let fichasJugador1 = fichasInicial;
 let fichasJugador2 = fichasInicial;
 let jugador1 = null;
 let jugador2 = null;
+let arrastrar = false;
+    var delta = new Object();
+    var L = 5;
+    var paso = 2;
+    var R = 100;
+    var X = canvas.width / 2;
+    var Y = canvas.height / 2;
+
+let amarilla = {
+    x: 190,
+    y: 160
+};
+let roja = {
+    x: 1111,
+    y: 160
+}
 
 function dibujarTablero(){
     let iteradorY = 0;
-        //465
     for(let y=0; y<384; y+=48){
         let iteradorX = 0;
         for(let x=420;x<920;x+=50){
@@ -22,7 +35,8 @@ function dibujarTablero(){
                 "x": x, 
                 "y": y,
                 "iteradorX": iteradorX,
-                "iteradorY": iteradorY
+                "iteradorY": iteradorY, 
+                "ocupado": false
             };
             image.onload = function(){        
                 matrizTablero.push(json);
@@ -37,7 +51,6 @@ function dibujarTablero(){
 function dibujarFicha(color, jugador, x, y){
     let ficha = new Image();
     ficha.src = "../img/"+color;
-    console.log(jugador)
     if(jugador == jugador1){
         if(fichasJugador1 > 0){
             ficha.onload = function(){        
@@ -51,9 +64,57 @@ function dibujarFicha(color, jugador, x, y){
             }
         }
     }
-    
 }
 
+function onMousePos(e) {
+            return {
+            x: e.layerX,
+            y: e.layerY
+            };
+    }
+
+function isCircleClicked(mousePos){
+    return mousePos.x >= amarilla.x && mousePos.x < amarilla.x + 50 &&
+    mousePos.y >= amarilla.y && mousePos.y < amarilla.y + 48 ||
+    mousePos.x >= roja.x && mousePos.x < roja.x + 50 &&
+        mousePos.y >= roja.y && mousePos.y < roja.y + 48;
+}
+
+canvas.addEventListener("mousedown", function(evt) {
+    console.log("hola")
+    var mousePos = onMousePos(evt);
+    
+  if (isCircleClicked(mousePos)) {
+    arrastrar = true;
+      delta.x = X - mousePos.x;
+      delta.y = Y - mousePos.y;
+    }
+  }, false);
+
+
+  canvas.addEventListener("mousemove", function(evt) {
+    var mousePos = onMousePos(evt);
+
+    if (arrastrar) {
+        X = mousePos.x + delta.x, Y = mousePos.y + delta.y
+    }
+  }, false);
+
+  
+  canvas.addEventListener("mouseup", function(evt) {
+    if(arrastrar){
+        var mousePos = onMousePos(evt);
+        if(isInsideBoard(mousePos))
+            dibujarFicha("fichaAmarilla.png", jugador1, mousePos.x, mousePos.y);
+    }   
+    arrastrar = false;
+  }, false);
+
+
+function isInsideBoard(mousePos){
+    return mousePos.x >= 420 && mousePos.x <= 420+canvas.width && 
+        mousePos.y >= 0 && mousePos.y <= canvas.height;
+}
 
 function iniciarJS(){
     dibujarTablero();
@@ -62,13 +123,3 @@ function iniciarJS(){
 }
 
 iniciarJS();
-
-function onMouseMove(e){
- 
-    ctx.moveTo(e.layerX, e.layerY);
-    
-}
-
-canvas.addEventListener('mousedown',onMouseDown, false);
-canvas.addEventListener('mousemove', onMouseMove, false);
-canvas.addEventListener('mouseup', onMouseUp, false);
