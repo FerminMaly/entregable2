@@ -1,21 +1,9 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let matrizTablero = [];
-let fichasInicial = 40;
-let fichasJugador1 = fichasInicial;
-let fichasJugador2 = fichasInicial;
-let jugador1 = null;
-let jugador2 = null;
-let arrastrar = false;
-let delta = new Object();
-let X = canvas.width / 2;
-let Y = canvas.height / 2;
-
-var BB=canvas.getBoundingClientRect();
-var offsetX=BB.left;
-var offsetY=BB.top;
-var startX;
-var startY;
+let cantidadFichasPrimerJugador = 40;
+let cantidadFichasSegundoJugador = 40;
+let color = '';
 
 let amarilla = {
     "x": 190,
@@ -28,13 +16,11 @@ let roja = {
     "clicked": false
 }
 
-var fichasAmarrilas = [];
-var fichasRojas = [];
-
 function dibujarTablero(){
-    let iteradorY = 0;
+    let fila = 0;
+    let elementoActual = 0;
     for(let y=0; y<384; y+=48){
-        let iteradorX = 0;
+        let columna = 0;
         for(let x=420;x<920;x+=50){
             let image = new Image();
             image.src = "../img/fichero.png";
@@ -42,181 +28,114 @@ function dibujarTablero(){
                 "imagen" : image,
                 "x": x, 
                 "y": y,
-                "iteradorX": iteradorX,
-                "iteradorY": iteradorY, 
+                "columna": columna,
+                "fila": fila, 
                 "ocupado": false,
             };
             image.onload = function(){        
-                matrizTablero.push(json);
                 ctx.drawImage(image, x, y);
             }
-            iteradorX++;
+            matrizTablero.push(json);
+            columna++;
+            elementoActual++;
         }
-        iteradorY++;
+        fila++;
     }
 }
 
-function inicializarFichas(color, jugador, x, y){
-    
-    if(jugador == "jugador1"){
-        if(fichasJugador1 > 0){
-            for(let i =0; i<fichasJugador1;i++){
-                let ficha = new Image();
-                ficha.src = "../img/"+color;
-                ficha.onload = function(){  
-                    amarilla={
-                        "x": x, 
-                        "y": y, 
-                        "clicked": false};
-                    fichasAmarrilas[i] = amarilla;  
-                    console.log(fichasAmarrilas.length)
-                    ctx.drawImage(ficha, x, y);
-                    if(x<350){
-                        x+=50;
-                    }
-                    else{
-                        x=0;
-                        y+=48;
-                    }
-                }
-            }
-        }
-    } 
-    else if (jugador == "jugador2"){
-        if(fichasJugador2 > 0){
-            for(let i =0; i<fichasJugador2;i++){
-                let ficha = new Image();
-                ficha.src = "../img/"+color;
-                ficha.onload = function(){   
-                    roja = {
-                        "x": x, 
-                        "y": y, 
-                        "clicked": false}
-                    fichasRojas[i] = roja;
-                    ctx.drawImage(ficha, x, y);
-
-                    if(x<canvas.width - 100){
-                        x+=50;
-                    }
-                    else{
-                        x=920;
-                        y+=48;
-                    }
-                }
-            }
-        }
-    }
-}
-
-function onMousePos(e) {
-            return {
-            x: e.layerX,
-            y: e.layerY
-            };
-    }
-
-function isCircleClicked(mousePos){
-    return mousePos.x >= amarilla.x && mousePos.x < amarilla.x + 50 &&
-    mousePos.y >= amarilla.y && mousePos.y < amarilla.y + 48 ||
-    mousePos.x >= roja.x && mousePos.x < roja.x + 50 &&
-        mousePos.y >= roja.y && mousePos.y < roja.y + 48;
-}
-
-function reDibujarFichaTablero(jugador, x, y){
+function dibujarFicha(color, x, y){
     let ficha = new Image();
-
-    if(jugador == "jugador1"){
+    if(color == 'amarillo')
         ficha.src = "../img/fichaAmarilla.png";
-        fichasAmarrilas[fichasJugador1-1].x = x;
-        fichasAmarrilas[fichasJugador1-1].y = y;
-        
-        fichasJugador1--;
-    }
-    else if(jugador == "jugador2"){
+    
+    else
         ficha.src = "../img/fichaRojo.png";
-
-        fichasRojas[fichasJugador2].x = x;
-        fichasRojas[fichasJugador2].y = y;
-        
-        fichasJugador2--;
-    }
-
-    ficha.onload = function(){        
+    ficha.onload = function(){  
         ctx.drawImage(ficha, x, y);
     }
 }
 
-canvas.addEventListener("mousedown", function(e) {
-     var mousePos = onMousePos(e);
+function coordenadaMouse(e) {
+    return {
+    x: e.layerX,
+    y: e.layerY
+    };
+}
 
-     e.preventDefault();
-     e.stopPropagation();
-    
-     if (isCircleClicked(mousePos)) {
-        arrastrar = true;
-        fichasAmarrilas[fichasJugador1-1].clicked = true;
-        delta.x = parseInt(mousePos.x-offsetX);
-        delta.y = parseInt(mousePos.y-offsetY);
-     }
-     startX = delta.x;
-     startY = delta.y;
-}, false);
+function moverFicha (color, e){
+    //Dibujo la ficha en el tablero
+    let cords = coordenadaMouse()
+    dibujarFicha (color, x, y);
 
 
-  canvas.addEventListener("mousemove", function(e) {
-    var mousePos = onMousePos(e);
+}
 
-    if (arrastrar) {
-        e.preventDefault();
-        e.stopPropagation();
+function dentroRango(mousePos, figura){
+    return mousePos.x >= figura.x && mousePos.x < figura.x + 50 &&
+    mousePos.y >= figura.y && mousePos.y < figura.y + 48;
+}
 
-        delta.x = parseInt(mousePos.x-offsetX);
-        delta.y = parseInt(mousePos.y-offsetY);
-
-        var dx = delta.x-startX;
-        var dy = delta.y-startY;
-
-        for(let i=0; i<fichasAmarrilas.length; i++){
-            let ficha = fichasAmarrilas[i];
-            if(ficha.clicked == true){
-                ficha.x += dx;
-                ficha.y += dy;
-            }
-        }
-        
-        //fichasRojas[fichasJugador2].x = mousePos.x + dx;
-        //fichasRojas[fichasJugador2].x = mousePos.y + dy;
-       // dibujarFicha("fichaAmarilla.png", jugador1, fichasAmarrilas[fichasJugador1].x, mousePos.y);
-        //amarilla.x = mousePos.x + dx;
-        //amarilla.y = mousePos.y + dy;
-
-    }
-  }, false);
-
-
-  canvas.addEventListener("mouseup", function(evt) {
-    if(arrastrar){
-        var mousePos = onMousePos(evt);
-        if(isInsideBoard(mousePos)){
-            reDibujarFichaTablero("jugador1", mousePos.x, mousePos.y);
-            console.log(fichasAmarrilas.length);
-            fichasAmarrilas = [];
-            inicializarFichas("fichaAmarilla.png", "jugador1", 0, 0);
-        }
-    }   
-    arrastrar = false;
-  }, false);
-
-
-function isInsideBoard(mousePos){
+function adentroTablero(mousePos){
     return mousePos.x >= 420 && mousePos.x <= 420+canvas.width && 
         mousePos.y >= 0 && mousePos.y <= canvas.height;
 }
 
+canvas.addEventListener('mousedown', function(e){
+    let cords = coordenadaMouse(e);
+    if (dentroRango(cords, amarilla))
+        color = 'amarillo'
+    else
+        if (dentroRango(cords, roja))
+            color = 'rojo'
+});
+
+canvas.addEventListener('mousemove', function(){
+    
+});
+
+canvas.addEventListener('mouseup', function(e){
+    let cords = coordenadaMouse(e);
+    if(adentroTablero(cords)){
+        for(let i = 0; i < matrizTablero.length; i++){
+            if(dentroRango(cords, matrizTablero[i])){
+                if(matrizTablero[i].ocupado ==  false){
+                    for(let iterador = i + 10; iterador < matrizTablero.length; iterador += 10){
+                        if(matrizTablero[iterador].ocupado == true){
+                            dibujarFicha(color, matrizTablero[iterador - 10].x,matrizTablero[iterador - 10].y);
+                            matrizTablero[iterador - 10].ocupado = true;
+                            restaJugador();
+                            console.log(cantidadFichasPrimerJugador)
+                            return;
+                        }
+                        else if (matrizTablero[iterador].fila == 7){
+                            dibujarFicha(color, matrizTablero[iterador].x,matrizTablero[iterador].y);
+                            matrizTablero[iterador].ocupado = true;
+                            restaJugador();
+                            console.log(cantidadFichasPrimerJugador)
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        color = '';
+    }
+});
+
+function restaJugador(){
+    if(color == 'amarillo')
+        cantidadFichasPrimerJugador--;
+    else
+        cantidadFichasSegundoJugador--;
+}
+
+
 function iniciarJS(){
     dibujarTablero();
-    inicializarFichas("fichaAmarilla.png", "jugador1", 0, 0);
-    inicializarFichas("fichaRojo.png", "jugador2", 920 , 0);
+    dibujarFicha("amarillo", 190, 166);
+    dibujarFicha("rojo",  1111 , 166);
 }
 
 iniciarJS();
