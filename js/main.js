@@ -34,6 +34,7 @@ function dibujarTablero(){
                 "columna": columna,
                 "fila": fila, 
                 "ocupado": false,
+                "color": color,
             };
             image.onload = function(){        
                 ctx.drawImage(image, x, y);
@@ -95,13 +96,18 @@ function setJugador(){
     }   
 }
 
-function logicaJugador(){
+function logicaJugador(elementoTabla){
+    checkCuatroEnLinea(elementoTabla);
     restaJugador();
     setJugador();
     mostrarJugador();
-    console.log(juega);
     color = '';
     arrastrar = false;
+}
+
+function checkCuatroEnLinea(elementoTabla){
+    
+
 }
 
 canvas.addEventListener('mousedown', function(e){
@@ -121,20 +127,22 @@ canvas.addEventListener('mousedown', function(e){
 canvas.addEventListener('mouseup', function(e){
     
     let cords = coordenadaMouse(e);
-    if(adentroTablero(cords) && arrastrar == true){
+    if(adentroTablero(cords) && arrastrar){
         for(let i = 0; i < matrizTablero.length; i++){
             if(dentroRango(cords, matrizTablero[i])){
                 if(matrizTablero[i].ocupado ==  false){
                     for(let iterador = i + 10; iterador < matrizTablero.length; iterador += 10){
                         if(matrizTablero[iterador].ocupado == true){
                             dibujarFicha(color, matrizTablero[iterador - 10].x,matrizTablero[iterador - 10].y);
-                            matrizTablero[iterador - 10].ocupado = true;                         
-                            logicaJugador();
+                            matrizTablero[iterador - 10].ocupado = true;
+                            matrizTablero[iterador - 10].color = color;     
+                            logicaJugador(matrizTablero[iterador - 10]);
                             return;
                         }
                         else if (matrizTablero[iterador].fila == 7){
                             dibujarFicha(color, matrizTablero[iterador].x,matrizTablero[iterador].y);
                             matrizTablero[iterador].ocupado = true;
+                            matrizTablero[iterador].color = color;
                             logicaJugador();
                             return;
                         }
