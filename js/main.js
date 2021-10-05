@@ -18,16 +18,18 @@ var startX;
 var startY;
 
 let amarilla = {
-    x: 190,
-    y: 160
+    "x": 190,
+    "y": 160, 
+    "clicked": false
 };
 let roja = {
-    x: 1111,
-    y: 160
+    "x": 1111,
+    "y": 160,
+    "clicked": false
 }
 
-let fichasAmarrilas = [];
-let fichasRojas = [];
+var fichasAmarrilas = [];
+var fichasRojas = [];
 
 function dibujarTablero(){
     let iteradorY = 0;
@@ -54,32 +56,56 @@ function dibujarTablero(){
     }
 }
 
-function dibujarFicha(color, jugador, x, y){
-    let ficha = new Image();
-    ficha.src = "../img/"+color;
-    if(jugador == jugador1){
+function inicializarFichas(color, jugador, x, y){
+    
+    if(jugador == "jugador1"){
         if(fichasJugador1 > 0){
             for(let i =0; i<fichasJugador1;i++){
-                ficha.onload = function(){        
+                let ficha = new Image();
+                ficha.src = "../img/"+color;
+                ficha.onload = function(){  
+                    amarilla={
+                        "x": x, 
+                        "y": y, 
+                        "clicked": false};
+                    fichasAmarrilas[i] = amarilla;  
+                    console.log(fichasAmarrilas.length)
                     ctx.drawImage(ficha, x, y);
-                    fichasAmarrilas.push({x: x, y: y});
+                    if(x<350){
+                        x+=50;
+                    }
+                    else{
+                        x=0;
+                        y+=48;
+                    }
                 }
-                
             }
         }
-    } else if (jugador == jugador2){
+    } 
+    else if (jugador == "jugador2"){
         if(fichasJugador2 > 0){
-            for(let i =0; i<fichasJugador1;i++){
-            image.onload = function(){        
-                ctx.drawImage(image, x, y);
-                fichasRojas.push({x: x, y: y});
+            for(let i =0; i<fichasJugador2;i++){
+                let ficha = new Image();
+                ficha.src = "../img/"+color;
+                ficha.onload = function(){   
+                    roja = {
+                        "x": x, 
+                        "y": y, 
+                        "clicked": false}
+                    fichasRojas[i] = roja;
+                    ctx.drawImage(ficha, x, y);
+
+                    if(x<canvas.width - 100){
+                        x+=50;
+                    }
+                    else{
+                        x=920;
+                        y+=48;
+                    }
+                }
             }
-            
-        }
         }
     }
-    console.log(fichasRojas);
-    console.log(fichasAmarrilas);
 }
 
 function onMousePos(e) {
@@ -96,6 +122,30 @@ function isCircleClicked(mousePos){
         mousePos.y >= roja.y && mousePos.y < roja.y + 48;
 }
 
+function reDibujarFichaTablero(jugador, x, y){
+    let ficha = new Image();
+
+    if(jugador == "jugador1"){
+        ficha.src = "../img/fichaAmarilla.png";
+        fichasAmarrilas[fichasJugador1-1].x = x;
+        fichasAmarrilas[fichasJugador1-1].y = y;
+        
+        fichasJugador1--;
+    }
+    else if(jugador == "jugador2"){
+        ficha.src = "../img/fichaRojo.png";
+
+        fichasRojas[fichasJugador2].x = x;
+        fichasRojas[fichasJugador2].y = y;
+        
+        fichasJugador2--;
+    }
+
+    ficha.onload = function(){        
+        ctx.drawImage(ficha, x, y);
+    }
+}
+
 canvas.addEventListener("mousedown", function(e) {
      var mousePos = onMousePos(e);
 
@@ -104,6 +154,7 @@ canvas.addEventListener("mousedown", function(e) {
     
      if (isCircleClicked(mousePos)) {
         arrastrar = true;
+        fichasAmarrilas[fichasJugador1-1].clicked = true;
         delta.x = parseInt(mousePos.x-offsetX);
         delta.y = parseInt(mousePos.y-offsetY);
      }
@@ -112,11 +163,9 @@ canvas.addEventListener("mousedown", function(e) {
 }, false);
 
 
-  canvas.addEventListener("mousemove", function(evt) {
-    var mousePos = onMousePos(evt);
+  canvas.addEventListener("mousemove", function(e) {
+    var mousePos = onMousePos(e);
 
-    
-    
     if (arrastrar) {
         e.preventDefault();
         e.stopPropagation();
@@ -127,13 +176,20 @@ canvas.addEventListener("mousedown", function(e) {
         var dx = delta.x-startX;
         var dy = delta.y-startY;
 
-        fichasAmarrilas[fichasJugador1].x = mousePos.x + dx;
-        fichasAmarrilas[fichasJugador1].y = mousePos.y + dy;
+        for(let i=0; i<fichasAmarrilas.length; i++){
+            let ficha = fichasAmarrilas[i];
+            if(ficha.clicked == true){
+                ficha.x += dx;
+                ficha.y += dy;
+            }
+        }
+        
         //fichasRojas[fichasJugador2].x = mousePos.x + dx;
         //fichasRojas[fichasJugador2].x = mousePos.y + dy;
-        dibujarFicha("fichaAmarilla.png", jugador1, fichasAmarrilas[fichasJugador1].x, mousePos.y);
+       // dibujarFicha("fichaAmarilla.png", jugador1, fichasAmarrilas[fichasJugador1].x, mousePos.y);
         //amarilla.x = mousePos.x + dx;
         //amarilla.y = mousePos.y + dy;
+
     }
   }, false);
 
@@ -141,8 +197,12 @@ canvas.addEventListener("mousedown", function(e) {
   canvas.addEventListener("mouseup", function(evt) {
     if(arrastrar){
         var mousePos = onMousePos(evt);
-        if(isInsideBoard(mousePos))
-            dibujarFicha("fichaAmarilla.png", jugador1, mousePos.x, mousePos.y);
+        if(isInsideBoard(mousePos)){
+            reDibujarFichaTablero("jugador1", mousePos.x, mousePos.y);
+            console.log(fichasAmarrilas.length);
+            fichasAmarrilas = [];
+            inicializarFichas("fichaAmarilla.png", "jugador1", 0, 0);
+        }
     }   
     arrastrar = false;
   }, false);
@@ -155,8 +215,8 @@ function isInsideBoard(mousePos){
 
 function iniciarJS(){
     dibujarTablero();
-    dibujarFicha("fichaAmarilla.png", jugador1, 190, 160);
-    dibujarFicha("fichaRojo.png", jugador2, 1111 , 160);
+    inicializarFichas("fichaAmarilla.png", "jugador1", 0, 0);
+    inicializarFichas("fichaRojo.png", "jugador2", 920 , 0);
 }
 
 iniciarJS();
