@@ -4,6 +4,8 @@ let matrizTablero = [];
 let cantidadFichasPrimerJugador = 40;
 let cantidadFichasSegundoJugador = 40;
 let color = '';
+let juega = 1;
+let arrastrar = false;
 
 let amarilla = {
     "x": 190,
@@ -15,6 +17,7 @@ let roja = {
     "y": 160,
     "clicked": false
 }
+
 
 function dibujarTablero(){
     let fila = 0;
@@ -62,14 +65,6 @@ function coordenadaMouse(e) {
     };
 }
 
-function moverFicha (color, e){
-    //Dibujo la ficha en el tablero
-    let cords = coordenadaMouse()
-    dibujarFicha (color, x, y);
-
-
-}
-
 function dentroRango(mousePos, figura){
     return mousePos.x >= figura.x && mousePos.x < figura.x + 50 &&
     mousePos.y >= figura.y && mousePos.y < figura.y + 48;
@@ -80,50 +75,6 @@ function adentroTablero(mousePos){
         mousePos.y >= 0 && mousePos.y <= canvas.height;
 }
 
-canvas.addEventListener('mousedown', function(e){
-    let cords = coordenadaMouse(e);
-    if (dentroRango(cords, amarilla))
-        color = 'amarillo'
-    else
-        if (dentroRango(cords, roja))
-            color = 'rojo'
-});
-
-canvas.addEventListener('mousemove', function(){
-    
-});
-
-canvas.addEventListener('mouseup', function(e){
-    let cords = coordenadaMouse(e);
-    if(adentroTablero(cords)){
-        for(let i = 0; i < matrizTablero.length; i++){
-            if(dentroRango(cords, matrizTablero[i])){
-                if(matrizTablero[i].ocupado ==  false){
-                    for(let iterador = i + 10; iterador < matrizTablero.length; iterador += 10){
-                        if(matrizTablero[iterador].ocupado == true){
-                            dibujarFicha(color, matrizTablero[iterador - 10].x,matrizTablero[iterador - 10].y);
-                            matrizTablero[iterador - 10].ocupado = true;
-                            restaJugador();
-                            console.log(cantidadFichasPrimerJugador)
-                            return;
-                        }
-                        else if (matrizTablero[iterador].fila == 7){
-                            dibujarFicha(color, matrizTablero[iterador].x,matrizTablero[iterador].y);
-                            matrizTablero[iterador].ocupado = true;
-                            restaJugador();
-                            console.log(cantidadFichasPrimerJugador)
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-        
-        
-        color = '';
-    }
-});
-
 function restaJugador(){
     if(color == 'amarillo')
         cantidadFichasPrimerJugador--;
@@ -131,11 +82,75 @@ function restaJugador(){
         cantidadFichasSegundoJugador--;
 }
 
+function mostrarJugador(){
+    let turno = document.getElementById("turno");
+    turno.innerHTML = "Es el turno del jugador "+juega;
+}
+
+function setJugador(){
+    if(color == 'amarillo')
+        juega = 2;
+    else if(color == 'rojo'){
+        juega = 1;
+    }   
+}
+
+function logicaJugador(){
+    restaJugador();
+    setJugador();
+    mostrarJugador();
+    console.log(juega);
+    color = '';
+    arrastrar = false;
+}
+
+canvas.addEventListener('mousedown', function(e){
+    
+    let cords = coordenadaMouse(e);
+    
+    if (dentroRango(cords, amarilla) && juega == 1){
+        color = 'amarillo';
+        arrastrar = true;
+    }
+    else if (dentroRango(cords, roja) && juega == 2){
+        color = 'rojo';
+        arrastrar = true;
+    }
+});
+
+canvas.addEventListener('mouseup', function(e){
+    
+    let cords = coordenadaMouse(e);
+    if(adentroTablero(cords) && arrastrar == true){
+        for(let i = 0; i < matrizTablero.length; i++){
+            if(dentroRango(cords, matrizTablero[i])){
+                if(matrizTablero[i].ocupado ==  false){
+                    for(let iterador = i + 10; iterador < matrizTablero.length; iterador += 10){
+                        if(matrizTablero[iterador].ocupado == true){
+                            dibujarFicha(color, matrizTablero[iterador - 10].x,matrizTablero[iterador - 10].y);
+                            matrizTablero[iterador - 10].ocupado = true;                         
+                            logicaJugador();
+                            return;
+                        }
+                        else if (matrizTablero[iterador].fila == 7){
+                            dibujarFicha(color, matrizTablero[iterador].x,matrizTablero[iterador].y);
+                            matrizTablero[iterador].ocupado = true;
+                            logicaJugador();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+});
+
 
 function iniciarJS(){
     dibujarTablero();
     dibujarFicha("amarillo", 190, 166);
     dibujarFicha("rojo",  1111 , 166);
+    mostrarJugador();
 }
 
 iniciarJS();
