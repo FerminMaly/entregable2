@@ -88,6 +88,11 @@ function mostrarJugador(){
     turno.innerHTML = "Es el turno del jugador "+juega;
 }
 
+function mostrarGanador(ganador){
+    let turno = document.getElementById("turno");
+    turno.innerHTML = "El ganador es el jugador "+ ganador +"<br> Porfavor para iniciar otro juego <br> Reinicie la pagina";
+}
+
 function setJugador(){
     if(color == 'amarillo')
         juega = 2;
@@ -97,17 +102,66 @@ function setJugador(){
 }
 
 function logicaJugador(elementoTabla){
-    checkCuatroEnLinea(elementoTabla);
-    restaJugador();
-    setJugador();
-    mostrarJugador();
-    color = '';
-    arrastrar = false;
+    let hayGanador = checkCuatroEnLinea(elementoTabla);
+    if (!hayGanador){
+        restaJugador();
+        setJugador();
+        mostrarJugador();
+        color = '';
+        arrastrar = false;
+    }
 }
 
 function checkCuatroEnLinea(elementoTabla){
+    let colorActual = matrizTablero[elementoTabla].color;
+    //CODIGO PARA PREGUNTAR SOBRE ABAJO/ARRIBA
+    let contadorFichas = 1;
+    for(let iterador = elementoTabla+10;iterador<=79;iterador+=10){
+        if((matrizTablero[iterador].ocupado == true) &&  (matrizTablero[iterador].color == colorActual)){
+            contadorFichas++;
+            if(contadorFichas == 4){
+                mostrarGanador(juega)
+                return true;
+            }
+        }
+        else if((matrizTablero[iterador].ocupado == true) &&  (matrizTablero[iterador].color != colorActual)){
+            return false;
+        }
+        
+    }
+    contadorFichas = 1;
     
+    //CODIGO PARA IZQUIERDA
+    for(let iterador = elementoTabla+1;iterador<=elementoTabla+4;iterador++){
+        if(iterador< matrizTablero.length){
+            if((matrizTablero[iterador-1].ocupado == true) &&  (matrizTablero[iterador].color == colorActual)){
+                contadorFichas++;
+                console.log(contadorFichas)
+                if(contadorFichas == 4){
+                    mostrarGanador(juega)
+                    return true;
+                }
+            }
+            else if((matrizTablero[iterador-1].ocupado == true) &&  (matrizTablero[iterador].color != colorActual)){
+                return false;
+            }
+        }
+    }
 
+    //CODIGO PARA DERECHA
+    for(let iterador = elementoTabla-1;iterador<=elementoTabla+4;iterador++){
+        if(iterador< matrizTablero.length){
+            if((matrizTablero[iterador-1].ocupado == true) &&  (matrizTablero[iterador].color == colorActual)){
+                contadorFichas++;
+                if(contadorFichas == 4){
+                    mostrarGanador(juega)
+                    return true;
+                }
+            }
+        }
+    }
+    
+    
 }
 
 canvas.addEventListener('mousedown', function(e){
@@ -136,14 +190,14 @@ canvas.addEventListener('mouseup', function(e){
                             dibujarFicha(color, matrizTablero[iterador - 10].x,matrizTablero[iterador - 10].y);
                             matrizTablero[iterador - 10].ocupado = true;
                             matrizTablero[iterador - 10].color = color;     
-                            logicaJugador(matrizTablero[iterador - 10]);
+                            logicaJugador(iterador - 10);
                             return;
                         }
                         else if (matrizTablero[iterador].fila == 7){
                             dibujarFicha(color, matrizTablero[iterador].x,matrizTablero[iterador].y);
                             matrizTablero[iterador].ocupado = true;
                             matrizTablero[iterador].color = color;
-                            logicaJugador();
+                            logicaJugador(iterador);
                             return;
                         }
                     }
