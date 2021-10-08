@@ -112,10 +112,60 @@ function logicaJugador(elementoTabla){
     }
 }
 
-function checkCuatroEnLinea(elementoTabla){
-    let colorActual = matrizTablero[elementoTabla].color;
+function codigoCruzadoDer(colorActual, elementoTabla){
+    let elemento = elementoTabla;
+    let iterador = 0;
+    console.log(matrizTablero[elemento].ocupado)
+    if(elementoTabla + 9 < matrizTablero.length){
+        for(iterador = elementoTabla+9; iterador <=79 ; iterador+9){
+            if(matrizTablero[elemento].ocupado == true && matrizTablero[elemento].color == colorActual && matrizTablero[elemento].fila < matrizTablero[elemento + 9].fila){
+                iterador++;
+            }
+        }
+    
+    /*while(iterador < 5 && elemento <= matrizTablero.length && matrizTablero[elemento].ocupado == true){
+        console.log(elemento)
+        if(matrizTablero[elemento].ocupado == true && matrizTablero[elemento].color == colorActual){
+            if(elemento+=9 < matrizTablero.length){
+                elemento+=9;
+                iterador++;
+            }
+            else
+            return false
+        }
+        else 
+            return false     
+    }*/
+    }
+    if(iterador == 4){
+        mostrarGanador(juega);
+        return true;
+    }
+    else
+        return false;
+    
+}
+
+function codigoIzquierda(colorActual, contadorFichas, elementoTabla){
+    //CODIGO PARA IZQUIERDA
+    for(let iterador = elementoTabla-1;iterador>=elementoTabla-3;iterador--){
+        if((iterador< matrizTablero.length) && (matrizTablero[elementoTabla].fila == matrizTablero[iterador].fila)){
+            if((matrizTablero[iterador].ocupado == true) && (matrizTablero[iterador].color == colorActual)){
+                contadorFichas++;
+                if(contadorFichas == 4){
+                    mostrarGanador(juega)
+                    return true;
+                }
+            }
+            else if((matrizTablero[iterador-1].ocupado == true) &&  (matrizTablero[iterador].color != colorActual)){
+                return false;
+            }
+        }
+    }
+}
+
+function codigoArribaOAbajo(colorActual, contadorFichas, elementoTabla){
     //CODIGO PARA PREGUNTAR SOBRE ABAJO/ARRIBA
-    let contadorFichas = 1;
     for(let iterador = elementoTabla+10;iterador<=79;iterador+=10){
         if((matrizTablero[iterador].ocupado == true) &&  (matrizTablero[iterador].color == colorActual)){
             contadorFichas++;
@@ -127,41 +177,29 @@ function checkCuatroEnLinea(elementoTabla){
         else if((matrizTablero[iterador].ocupado == true) &&  (matrizTablero[iterador].color != colorActual)){
             return false;
         }
-        
     }
-    contadorFichas = 1;
-    
-    //CODIGO PARA IZQUIERDA
-    for(let iterador = elementoTabla+1;iterador<=elementoTabla+4;iterador++){
+}
+
+function codigoDerecha(colorActual, contadorFichas, elementoTabla){
+    for(let iterador = elementoTabla+1;iterador<=elementoTabla+3;iterador++){
         if(iterador< matrizTablero.length){
-            if((matrizTablero[iterador-1].ocupado == true) &&  (matrizTablero[iterador].color == colorActual)){
+            if((matrizTablero[iterador].color == colorActual) && matrizTablero[iterador].ocupado == true){
                 contadorFichas++;
-                console.log(contadorFichas)
                 if(contadorFichas == 4){
                     mostrarGanador(juega)
                     return true;
                 }
             }
-            else if((matrizTablero[iterador-1].ocupado == true) &&  (matrizTablero[iterador].color != colorActual)){
+            else if((matrizTablero[iterador].color != colorActual) && (matrizTablero[iterador].ocupado == true)){
                 return false;
             }
         }
     }
-
-    //CODIGO PARA DERECHA
-    for(let iterador = elementoTabla-1;iterador<=elementoTabla+4;iterador++){
-        if(iterador< matrizTablero.length){
-            if((matrizTablero[iterador-1].ocupado == true) &&  (matrizTablero[iterador].color == colorActual)){
-                contadorFichas++;
-                if(contadorFichas == 4){
-                    mostrarGanador(juega)
-                    return true;
-                }
-            }
-        }
-    }
-    
-    
+}
+function checkCuatroEnLinea(elementoTabla){
+    let colorActual = matrizTablero[elementoTabla].color;
+    let contadorFichas = 1;
+    return codigoIzquierda(colorActual,contadorFichas,elementoTabla) || codigoArribaOAbajo(colorActual,contadorFichas,elementoTabla) || codigoDerecha(colorActual,contadorFichas,elementoTabla) || codigoCruzadoDer(colorActual, elementoTabla);
 }
 
 canvas.addEventListener('mousedown', function(e){
