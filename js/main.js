@@ -34,21 +34,22 @@ function time_remaining(endtime){
 	return {'total':t, 'days':days, 'hours':hours, 'minutes':minutes, 'seconds':seconds};
 }
 
-//Funcion sacada de internet
 
 function update_clock(){
     let clock = document.getElementById("timer");
     let t = time_remaining(deadline);
     clock.innerHTML = 'minutes: '+t.minutes+'<br>seconds: '+t.seconds;
-    if(t.total<=0){ 
-        clearInterval(timeinterval); 
+    let timeInterval = setInterval(update_clock,1000);
+    if(t.total<=0 && !juegoTerminado){ 
         juegoTerminado = true;
         document.getElementById("turno").innerHTML = "El tiempo de juego ha terminado";
+        clearInterval(timeInterval);
+        clock.innerHTML = '';
     }
-    setInterval(update_clock,1000);
+    if(juegoTerminado)
+        clock.innerHTML = '';
+    
 }
-	// run function once at first to avoid delay
-   
 
 
 
