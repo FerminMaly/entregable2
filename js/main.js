@@ -6,6 +6,11 @@ let cantidadFichasSegundoJugador = 40;
 let color = '';
 let juega = 1;
 let arrastrar = false;
+let juegoTerminado = false;
+
+let tiempo_partida = 3;
+let current_time = Date.parse(new Date());
+let deadline = new Date(current_time + tiempo_partida*60*1000);
 
 let amarilla = {
     "x": 190,
@@ -17,6 +22,36 @@ let roja = {
     "y": 160,
     "clicked": false
 }
+
+
+//Funcion sacada de internet
+function time_remaining(endtime){
+	let t = Date.parse(endtime) - Date.parse(new Date());
+	let seconds = Math.floor( (t/1000) % 60 );
+	let minutes = Math.floor( (t/1000/60) % 60 );
+	let hours = Math.floor( (t/(1000*60*60)) % 24 );
+	let days = Math.floor( t/(1000*60*60*24) );
+	return {'total':t, 'days':days, 'hours':hours, 'minutes':minutes, 'seconds':seconds};
+}
+
+//Funcion sacada de internet
+
+function update_clock(){
+    let clock = document.getElementById("timer");
+    let t = time_remaining(deadline);
+    clock.innerHTML = 'minutes: '+t.minutes+'<br>seconds: '+t.seconds;
+    if(t.total<=0){ 
+        clearInterval(timeinterval); 
+        juegoTerminado = true;
+        document.getElementById("turno").innerHTML = "El tiempo de juego ha terminado";
+    }
+    setInterval(update_clock,1000);
+}
+	// run function once at first to avoid delay
+   
+
+
+
 
 
 function dibujarTablero(){
@@ -89,6 +124,7 @@ function mostrarJugador(){
 }
 
 function mostrarGanador(ganador){
+    juegoTerminado = true;
     let turno = document.getElementById("turno");
     turno.innerHTML = "El ganador es el jugador "+ ganador +"<br> Porfavor para iniciar otro juego <br> Reinicie la pagina";
 }
@@ -112,38 +148,46 @@ function logicaJugador(elementoTabla){
     }
 }
 
-function codigoCruzadoDer(colorActual, elementoTabla){
-    let elemento = elementoTabla;
-    let iterador = 0;
-    console.log(matrizTablero[elemento].ocupado)
-    if(elementoTabla + 9 < matrizTablero.length){
-        for(iterador = elementoTabla+9; iterador <=79 ; iterador+9){
-            if(matrizTablero[elemento].ocupado == true && matrizTablero[elemento].color == colorActual && matrizTablero[elemento].fila < matrizTablero[elemento + 9].fila){
-                iterador++;
-            }
+function codigoCruzadoIzq(colorActual, contadorFichas, elementoTabla){
+    let i = elementoTabla+11;
+
+    while(contadorFichas < 4 && i < matrizTablero.length){
+        if(matrizTablero[i].ocupado == true && matrizTablero[i].color == colorActual && i <= matrizTablero.length){
+            contadorFichas++;
+            i += 11;
         }
-    
-    /*while(iterador < 5 && elemento <= matrizTablero.length && matrizTablero[elemento].ocupado == true){
-        console.log(elemento)
-        if(matrizTablero[elemento].ocupado == true && matrizTablero[elemento].color == colorActual){
-            if(elemento+=9 < matrizTablero.length){
-                elemento+=9;
-                iterador++;
-            }
-            else
-            return false
+        else{
+            return false;
         }
-        else 
-            return false     
-    }*/
     }
-    if(iterador == 4){
+
+    if(contadorFichas == 4){
         mostrarGanador(juega);
         return true;
     }
-    else
-        return false;
+
+    return false;
+}
+
+
+
+function codigoCruzadoDer(colorActual, contadorFichas, elementoTabla){
+    let i = elementoTabla+9;
     
+    while(contadorFichas < 4 && i < matrizTablero.length){
+        if(matrizTablero[i].ocupado == true && matrizTablero[i].color == colorActual && matrizTablero[i-9].fila < matrizTablero[i].fila && i <= matrizTablero.length){
+            contadorFichas++;
+            i += 9;
+        }
+        else
+            return false;
+    }
+    
+    if(contadorFichas == 4){
+        mostrarGanador(juega);
+        return true;
+    }
+    return false;
 }
 
 function codigoIzquierda(colorActual, contadorFichas, elementoTabla){
@@ -199,7 +243,11 @@ function codigoDerecha(colorActual, contadorFichas, elementoTabla){
 function checkCuatroEnLinea(elementoTabla){
     let colorActual = matrizTablero[elementoTabla].color;
     let contadorFichas = 1;
-    return codigoIzquierda(colorActual,contadorFichas,elementoTabla) || codigoArribaOAbajo(colorActual,contadorFichas,elementoTabla) || codigoDerecha(colorActual,contadorFichas,elementoTabla) || codigoCruzadoDer(colorActual, elementoTabla);
+    return codigoIzquierda(colorActual,contadorFichas,elementoTabla) || 
+        codigoArribaOAbajo(colorActual,contadorFichas,elementoTabla) || 
+            codigoDerecha(colorActual,contadorFichas,elementoTabla) || 
+                codigoCruzadoDer(colorActual, contadorFichas, elementoTabla) ||
+                    codigoCruzadoIzq(color, contadorFichas, elementoTabla);
 }
 
 canvas.addEventListener('mousedown', function(e){
@@ -219,10 +267,10 @@ canvas.addEventListener('mousedown', function(e){
 canvas.addEventListener('mouseup', function(e){
     
     let cords = coordenadaMouse(e);
-    if(adentroTablero(cords) && arrastrar){
+    if(adentroTablero(cords) && arrastrar && !juegoTerminado){
         for(let i = 0; i < matrizTablero.length; i++){
             if(dentroRango(cords, matrizTablero[i])){
-                if(matrizTablero[i].ocupado ==  false){
+                if(matrizTablero[i].ocupado ==  false ){
                     for(let iterador = i + 10; iterador < matrizTablero.length; iterador += 10){
                         if(matrizTablero[iterador].ocupado == true){
                             dibujarFicha(color, matrizTablero[iterador - 10].x,matrizTablero[iterador - 10].y);
@@ -245,6 +293,21 @@ canvas.addEventListener('mouseup', function(e){
     }
 });
 
+document.getElementById("reiniciar").addEventListener('click', function(){
+    matrizTablero = [];
+    cantidadFichasPrimerJugador = 40;
+    cantidadFichasSegundoJugador = 40;
+    color = '';
+    juega = 1;
+    arrastrar = false;
+    juegoTerminado = false;
+
+    current_time = Date.parse(new Date());
+    deadline = new Date(current_time + tiempo_partida*60*1000);
+
+    iniciarJS();
+    update_clock(); 
+});
 
 function iniciarJS(){
     dibujarTablero();
@@ -254,3 +317,4 @@ function iniciarJS(){
 }
 
 iniciarJS();
+update_clock(); 

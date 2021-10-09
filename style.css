@@ -19,3 +19,12 @@ h1, .turno{
     display: none;
 }
 
+
+.box-timer{
+    display: flex;
+    justify-content: space-between;
+}
+
+.rules{
+    margin-right: 30px;
+}
