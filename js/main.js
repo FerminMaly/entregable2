@@ -86,10 +86,10 @@ function dibujarTablero(){
 function dibujarFicha(color, x, y){
     let ficha = new Image();
     if(color == 'amarillo')
-        ficha.src = "./img/fichaAmarilla.png";
+        ficha.src = "![](./img/fichaAmarilla.png)";
     
     else
-        ficha.src = "./img/fichaRojo.png";
+        ficha.src = "![](./img/fichaRojo.png)";
     ficha.onload = function(){  
         ctx.drawImage(ficha, x, y);
     }
