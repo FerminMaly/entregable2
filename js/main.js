@@ -62,7 +62,7 @@ function dibujarTablero(){
         let columna = 0;
         for(let x=420;x<920;x+=50){
             let image = new Image();
-            image.src = "./img/fichero.png";
+            image.src = "![](./img/fichero.png)";
             let json = {
                 "imagen" : image,
                 "x": x, 
