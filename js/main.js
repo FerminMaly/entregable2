@@ -62,7 +62,7 @@ function dibujarTablero(){
         let columna = 0;
         for(let x=420;x<920;x+=50){
             let image = new Image();
-            image.src = "![](./img/fichero.png)";
+            image.src = "./img/fichero.png";
             let json = {
                 "imagen" : image,
                 "x": x, 
@@ -86,10 +86,10 @@ function dibujarTablero(){
 function dibujarFicha(color, x, y){
     let ficha = new Image();
     if(color == 'amarillo')
-        ficha.src = "![](./img/fichaAmarilla.png)";
+        ficha.src = "./img/fichaAmarilla.png";
     
     else
-        ficha.src = "![](./img/fichaRojo.png)";
+        ficha.src = "./img/fichaRojo.png";
     ficha.onload = function(){  
         ctx.drawImage(ficha, x, y);
     }
